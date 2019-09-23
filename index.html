@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>musicplayer</title>
+  <link rel="stylesheet" href="http://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    .cover {
+      background: url("pexels-photo-1105666.jpeg") center center no-repeat;
+      display: block;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      filter: blur(5px);
+      position: absolute;
+    }
+
+    .musicbox {
+      position: absolute;
+      left: 50%;
+      top: 40%;
+      transform: translate(-50%, -50%);
+      font-family: cursive;
+      font-size: 16px;
+      color: #f06d6a;
+      width: 340px;
+    }
+
+    .music-panel {
+      border: 1px solid rgb(238, 138, 135);
+      border-bottom: none;
+      padding: 20px 20px 5px 20px;
+      box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.1), 0px 2px 10px 0px rgba(0, 0, 0, 0.05);
+      background-color: rgba(255, 255, 255, 0.9);
+    }
+
+    .musicbox .control {
+      margin-top: 20px;
+      font-size: 22px;
+      color: #ee8a87;
+      float: left;
+    }
+
+    .musicbox .control .fa {
+      margin-right: 12px;
+      cursor: pointer;
+    }
+
+    .musicbox .info {
+      margin-left: 120px;
+    }
+
+    .control {
+      position: absolute;
+      left: 30px;
+      bottom: 90px;
+
+    }
+
+    .iconfont {
+      font-size: 30px;
+    }
+
+    .info {
+      font-size: 20px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .title {
+      font-size: 25px;
+    }
+
+    .bar {
+      margin-bottom: 20px;
+      width: 100%;
+      position: relative;
+    }
+
+    .progress-total {
+      border: 1px solid rgb(204, 203, 204);
+      width: 99%;
+      height: 6px;
+
+    }
+
+    .profress-now {
+      border: 4px solid rgb(238, 138, 135);
+      width: 0%;
+      position: absolute;
+      bottom: 0.5px;
+      height: 0;
+    }
+
+    .progress {
+      position: relative;
+      margin: 20px;
+    }
+
+    .time {
+      position: absolute;
+      top: 7px;
+      left: 90%;
+    }
+
+    .list {
+      list-style: none;
+      border: 2px solid rgb(238, 138, 135);
+
+
+    }
+
+    .list {
+      font-size: 20px;
+    }
+
+    li:first-of-type {
+      border-bottom: 1px solid rgba(235, 203, 142, 0.3);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="cover"></div>
+  <div class="musicbox">
+    <div class="music-panel">
+      <div class="music">
+        <div class="control">
+          <span class="back"><i class="fa fa-step-backward"></i></span>
+          <span class="play"><i class="fa fa-pause"></i></span>
+          <span class="forward"><i class="fa fa-step-forward"></i></span>
+        </div>
+        <div class="info">
+          <div class="title">My song</div>
+          <div class="auther">rouyu</div>
+        </div>
+      </div>
+
+
+
+
+
+
+      <div class="progress" style="cursor:pointer">
+        <div class="bar">
+          <div class="progress-total"></div>
+          <div class="profress-now"></div>
+        </div>
+        <div class="time">0:00</div>
+      </div>
+    </div>
+
+
+    <ul class="list">
+      <li class="list1">111111111</li>
+    </ul>
+
+
+
+
+  </div>
+
+
+
+
+
+
+  <script>
+    var musicList = []
+    var currentIndex = 0;
+    var audio = new Audio;
+    var clock
+    audio.autoplay = true;
+
+
+
+    getMusicList(function (list) {
+      musicList = list
+      loginMusic(list[currentIndex]);
+    })
+    audio.onplay = function () {
+      clock = setInterval(function () {
+        $('.profress-now').style.width = (audio.currentTime / audio.duration) * 100 + '%';
+        var min = Math.floor(audio.currentTime / 60)
+        var sec = Math.floor(audio.currentTime % 60) > 9 ? (Math.floor(audio.currentTime % 60)) : ('0' + Math.floor(audio.currentTime % 60))
+        $('.time').innerText = '' + min + ':' + sec
+
+      })
+    }
+
+    audio.onpause = function () {
+      clearInterval(clock)
+    }
+    audio.ended = function () {
+      currentIndex = (++currentIndex) % musicList.length
+      loginMusic(musicList[currentIndex])
+    }
+
+    $('.musicbox .play').onclick = function () {
+      if (audio.paused) {
+        audio.play()
+        this.querySelector('.fa').classList.remove('fa-play')
+        this.querySelector('.fa').classList.add('fa-pause')
+      }
+      else {
+        audio.pause()
+        this.querySelector('.fa').classList.remove('fa-pause')
+        this.querySelector('.fa').classList.add('fa-play')
+      }
+    }//播放和暂停按钮
+    $('.music .fa-step-forward').onclick = function () {
+      currentIndex = (++currentIndex) % musicList.length
+      loginMusic(musicList[currentIndex])
+    }//下一首按钮
+    $('.music  .fa-step-backward').onclick = function () {
+      currentIndex = ((--currentIndex) + musicList.length) % musicList.length
+      loginMusic(musicList[currentIndex])
+    }//上一首按钮
+    $('.bar').onclick = function (e) {
+      var plan = e.offsetX / parseInt(getComputedStyle(this).width)
+      console.log(plan)
+      audio.currentTime = audio.duration * plan
+    }//进度条
+    audio.onended = function () {
+      currentIndex = (++currentIndex) % musicList.length
+      loginMusic(musicList[currentIndex])
+    }//进度条结束
+
+
+
+
+
+
+
+    function $(selector) {
+      return document.querySelector(selector);
+    }
+
+    function getMusicList(callback) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', 'music.JSON', true)
+      xhr.onload = function () {
+        if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
+          callback(JSON.parse(this.responseText))
+        } else {
+          console.log("获取数据失败")
+        }
+      }
+      xhr.onerror = function () {
+        console.log("网络异常")
+      }
+      xhr.send()
+    }//获取数据结束
+    function loginMusic(musicObj) {
+      console.log("bent play", musicObj);
+      $('.music .title').innerText = musicObj.title
+      $('.music .auther').innerText = musicObj.auther
+      $('.list  .list1').innerText = musicObj.title
+      audio.src = musicObj.src;
+    }
+    function generateList(musicList) {
+      console.log(musicList)
+    }
+
+
+
+
+
+
+  </script>
+</body>
+
+</html>
